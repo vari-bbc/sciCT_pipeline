@@ -10,6 +10,10 @@ args = parser.parse_args()
 primer_barcode_path = args.input
 pb_df = pd.read_csv(primer_barcode_path)
 
+if "ID" not in pb_df.columns:
+    pb_df =df.rename(columns={'Sample': 'ID'})
+else: print(f"The column ID is present in the file")
+
 i7_ids = {val: i+1 for i, val in enumerate(pb_df['i7_index_seq'].unique())}
 length_i7 = len(i7_ids)
 
