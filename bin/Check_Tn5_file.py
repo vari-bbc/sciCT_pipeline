@@ -13,25 +13,9 @@ tn5_barcode_path = args.input
 file_extension = os.path.splitext(tn5_barcode_path)[1].lower()
 
 if file_extension == '.csv':
-    try:
-        df = pd.read_csv(tn5_barcode_path)
-        return df
-    except Exception as e:
-        print(f"Error reading CSV file {tn5_barcode_path}: {e}")
-        return None
+    df = pd.read_csv(tn5_barcode_path)
 elif file_extension == '.xlsx' or file_extension == '.xls':
-    try:
-        df = pd.read_excel(tn5_barcode_path)
-        return df
-    except Exception as e:
-        print(f"Error reading Excel file {tn5_barcode_path}: {e}")
-        return None
-else:
-    print(f"Unsupported file type: {file_extension}")
-    return None
-
-
-df = pd.read_excel(xlsx_path)
+    df = pd.read_excel(tn5_barcode_path)
 
 # Check if the last row has all non-null values (excluding NaN/None)
 if df.iloc[-1].isnull().any():
