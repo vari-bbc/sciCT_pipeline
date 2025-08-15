@@ -5,7 +5,7 @@ module load bbc2/pigz/pigz-2.7
 DirName='raw_data'
 
 FileName="$1"
-read_pair=${FileName#*_R}   # Remove everything up to and including _R
+read_pair=${FileName#*_[R,I]}   # Remove everything up to and including _R
 read_pair=${read_pair%%_*}  # Remove everything from next _ onwards
 
 pigz -dc ${DirName}/${FileName}  | \

@@ -3,11 +3,11 @@
 nextflow.enable.dsl=2
 
 params.primer_annot   = "index_files/Primer_Annotation.csv"
-params.meta_xlsx  = "metadata.xlsx"
-params.fastq1     = "reads_1.fastq.gz"
-params.fastq2     = "reads_2.fastq.gz"
-params.fastq3     = "reads_3.fastq.gz"
-params.fastq4     = "reads_4.fastq.gz"
+params.tn5_annot  = "index_files/Tn5_Barcode_Annotation.xlsx"
+params.fastq1     = "raw_data/sciCHIP_L000_R1_001.fastq.gz"
+params.fastq2     = "raw_data/sciCHIP_L000_R2_001.fastq.gz"
+params.umi1     = "raw_data/sciCHIP_UMI_S1_L001_I1_001.fastq.gz"
+params.umi2     = "raw_data/sciCHIP_UMI_S1_L001_I2_001.fastq.gz"
 
 params.output_dir = "results"
 
@@ -26,17 +26,18 @@ process PROCESS_PRIMER_ANNOT {
     """
 }
 
-process PROCESS_METADATA_XLSX {
-    tag "$meta_xlsx"
+process PROCESS_TN5_ANNOT {
+    tag "$tn5_annot"
     input:
-    path meta_xlsx from file(params.meta_xlsx)
+    path tn5_annot from file(params.tn5_annot)
 
     output:
-    path "metadata2_2.csv"
+    path "${tn5_annot.baseName}_2.csv"
 
     script:
     """
-    python script2.py $meta_xlsx metadata2_2.csv
+    conda activate sciCT_env
+    python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.baseName}_2.csv"
     """
 }
 
@@ -59,19 +60,19 @@ process RUN_EXTRACTION {
 
     input:
     path primer_annot2   from PROCESS_PRIMER_ANNOT.out
-    path meta_xlsx2  from PROCESS_METADATA_XLSX.out
+    path tn5_annot2  from PROCESS_TN5_ANNOT.out
     path processed_fastqs from PROCESS_FASTQ.out.collect()
 
     script:
     """
     conda activate my_extract_env
-    python extract.py $primer_annot2 $meta_xlsx2 ${processed_fastqs.join(" ")}
+    python extract.py $primer_annot2 $tn5_annot2 ${processed_fastqs.join(" ")}
     """
 }
 
 workflow {
     primer_annot_ch  = Channel.of(file(params.primer_annot))
-    meta_xlsx_ch = Channel.of(file(params.meta_xlsx))
+    tn5_annot_ch = Channel.of(file(params.tn5_annot))
 
     fastqs = Channel.of(
         file(params.fastq1),
@@ -81,8 +82,8 @@ workflow {
     )
 
     primer_annot_out  = PROCESS_PRIMER_ANNOT(primer_annot_ch)
-    meta_xlsx_out = PROCESS_METADATA_XLSX(meta_xlsx_ch)
+    tn5_annot_out = PROCESS_METADATA_XLSX(tn5_annot_ch)
     fastq_out     = PROCESS_FASTQ(fastqs)
 
-    RUN_EXTRACTION(primer_annot_out, meta_xlsx_out, fastq_out)
+    RUN_EXTRACTION(primer_annot_out, tn5_annot_out, fastq_out)
 }
