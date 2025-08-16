@@ -22,7 +22,7 @@ process PROCESS_PRIMER_ANNOT {
     script:
     """
     conda activate sciCT_env
-    python AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.baseName}_2.csv"
+    python AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.parent}/${primer_annot.baseName}_2.csv"
     """
 }
 
@@ -37,7 +37,7 @@ process PROCESS_TN5_ANNOT {
     script:
     """
     conda activate sciCT_env
-    python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.baseName}_2.csv"
+    python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.parent}/${tn5_annot.baseName}_2.csv"
     """
 }
 
@@ -47,15 +47,15 @@ process PROCESS_FASTQ {
     path fastq from fastqs
 
     output:
-    path "processed_${fastq.getName()}"
+    path "${fastq.parent}_mod/${fastq.getName()}"
 
     script:
     """
-    bash modify_fastq.sh $fastq processed_${fastq.getName()}
+    bash ModifyHeader.sh $fastq
     """
 }
 
-process RUN_EXTRACTION {
+process RUN_DEMUX {
     publishDir params.output_dir, mode: 'copy'
 
     input:
@@ -77,13 +77,13 @@ workflow {
     fastqs = Channel.of(
         file(params.fastq1),
         file(params.fastq2),
-        file(params.fastq3),
-        file(params.fastq4)
+        file(params.umi1),
+        file(params.umi2)
     )
 
     primer_annot_out  = PROCESS_PRIMER_ANNOT(primer_annot_ch)
     tn5_annot_out = PROCESS_METADATA_XLSX(tn5_annot_ch)
     fastq_out     = PROCESS_FASTQ(fastqs)
 
-    RUN_EXTRACTION(primer_annot_out, tn5_annot_out, fastq_out)
+    RUN_DEMUX(primer_annot_out, tn5_annot_out, fastq_out)
 }
