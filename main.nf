@@ -21,8 +21,8 @@ process PROCESS_PRIMER_ANNOT {
 
     script:
     """
-    conda activate sciCT_env
     python AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.parent}/${primer_annot.baseName}_2.csv"
+    dos2unix "${primer_annot.parent}/${primer_annot.baseName}_2.csv"
     """
 }
 
@@ -36,8 +36,8 @@ process PROCESS_TN5_ANNOT {
 
     script:
     """
-    conda activate sciCT_env
     python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.parent}/${tn5_annot.baseName}_2.csv"
+    dos2unix "${tn5_annot.parent}/${tn5_annot.baseName}_2.csv"
     """
 }
 
@@ -56,17 +56,17 @@ process PROCESS_FASTQ {
 }
 
 process RUN_DEMUX {
-    publishDir params.output_dir, mode: 'copy'
 
     input:
     path primer_annot2   from PROCESS_PRIMER_ANNOT.out
     path tn5_annot2  from PROCESS_TN5_ANNOT.out
     path processed_fastqs from PROCESS_FASTQ.out.collect()
 
+    output: 
+    path "$params.output_dir/*.fq.gz"
     script:
     """
-    conda activate my_extract_env
-    python extract.py $primer_annot2 $tn5_annot2 ${processed_fastqs.join(" ")}
+    sciCTextract --outdir $params.output_dir --forward-mode --Primer_Barcode $primer_annot2 --Tn5_Barcode $tn5_annot2 ${processed_fastqs.join(" ")}
     """
 }
 

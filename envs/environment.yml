@@ -1,0 +1,16 @@
+name: sciCT_env
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - dos2unix
+  - pip
+      - argparse==1.4.0
+      - biopython==1.85
+      - et-xmlfile==2.0.0
+      - numpy==2.2.3
+      - openpyxl==3.1.5
+      - pandas==2.2.3
+      - pytz==2025.2
+      - scictextract==0.2
+      - tzdata==2025.2
