@@ -14,59 +14,65 @@ params.output_dir = "results"
 process PROCESS_PRIMER_ANNOT {
     tag "$primer_annot"
     input:
-    path primer_annot from file(params.primer_annot)
+    path primer_annot
 
     output:
     path "${primer_annot.baseName}_2.csv"
 
     script:
     """
-    python AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.parent}/${primer_annot.baseName}_2.csv"
-    dos2unix "${primer_annot.parent}/${primer_annot.baseName}_2.csv"
+    python AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.baseName}_2.csv"
+    dos2unix "${primer_annot.baseName}_2.csv"
     """
 }
 
 process PROCESS_TN5_ANNOT {
     tag "$tn5_annot"
     input:
-    path tn5_annot from file(params.tn5_annot)
+    path tn5_annot
 
     output:
     path "${tn5_annot.baseName}_2.csv"
 
     script:
     """
-    python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.parent}/${tn5_annot.baseName}_2.csv"
-    dos2unix "${tn5_annot.parent}/${tn5_annot.baseName}_2.csv"
+    python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.baseName}_2.csv"
+    dos2unix "${tn5_annot.baseName}_2.csv"
     """
 }
 
 process PROCESS_FASTQ {
     tag "$fastq"
     input:
-    path fastq from fastqs
+    path fastq
 
     output:
-    path "${fastq.parent}_mod/${fastq.getName()}"
+    path "${fastq.simpleName}_mod.fastq.gz}"
 
     script:
     """
-    bash ModifyHeader.sh $fastq
+    bash ModifyHeader.sh $fastq "${fastq.simpleName}_mod.fastq.gz}"
     """
 }
 
 process RUN_DEMUX {
 
     input:
-    path primer_annot2   from PROCESS_PRIMER_ANNOT.out
-    path tn5_annot2  from PROCESS_TN5_ANNOT.out
-    path processed_fastqs from PROCESS_FASTQ.out.collect()
+    path primer_annot2   
+    path tn5_annot2  
+    val processed_fastqs 
 
     output: 
-    path "$params.output_dir/*.fq.gz"
+    path "demux_out/*.fq.gz", emit: demux_ch
+
     script:
     """
-    sciCTextract --outdir $params.output_dir --forward-mode --Primer_Barcode $primer_annot2 --Tn5_Barcode $tn5_annot2 ${processed_fastqs.join(" ")}
+    mdkir -r demux_out
+    sciCTextract --forward-mode \
+      --outdir $params.output_dir  \
+      --Primer_Barcode $primer_annot2 \
+      --Tn5_Barcode $tn5_annot2 \
+      ${processed_fastqs.join(" ")}
     """
 }
 
@@ -82,7 +88,7 @@ workflow {
     )
 
     primer_annot_out  = PROCESS_PRIMER_ANNOT(primer_annot_ch)
-    tn5_annot_out = PROCESS_METADATA_XLSX(tn5_annot_ch)
+    tn5_annot_out = PROCESS_TN5_ANNOT(tn5_annot_ch)
     fastq_out     = PROCESS_FASTQ(fastqs)
 
     RUN_DEMUX(primer_annot_out, tn5_annot_out, fastq_out)

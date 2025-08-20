@@ -4,6 +4,7 @@ channels:
 dependencies:
   - python
   - dos2unix
+  - pigz
   - pip
       - argparse==1.4.0
       - biopython==1.85
