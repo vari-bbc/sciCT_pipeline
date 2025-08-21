@@ -42,16 +42,16 @@ process PROCESS_TN5_ANNOT {
 }
 
 process PROCESS_FASTQ {
-    tag "$fastq"
+    tag "$fastq.baseName"
     input:
     path fastq
 
     output:
-    path "${fastq.simpleName}_mod.fastq.gz}"
+    path "${fastq.baseName}_mod.fastq.gz"
 
     script:
     """
-    bash ModifyHeader.sh $fastq "${fastq.simpleName}_mod.fastq.gz}"
+    bash ModifyHeader.sh $fastq "${fastq.baseName}_mod.fastq.gz}"
     """
 }
 
@@ -67,9 +67,9 @@ process RUN_DEMUX {
 
     script:
     """
-    mdkir -r demux_out
+    mkdir -p demux_out
     sciCTextract --forward-mode \
-      --outdir $params.output_dir  \
+      --outdir demux_out \
       --Primer_Barcode $primer_annot2 \
       --Tn5_Barcode $tn5_annot2 \
       ${processed_fastqs.join(" ")}
@@ -91,5 +91,5 @@ workflow {
     tn5_annot_out = PROCESS_TN5_ANNOT(tn5_annot_ch)
     fastq_out     = PROCESS_FASTQ(fastqs)
 
-    RUN_DEMUX(primer_annot_out, tn5_annot_out, fastq_out)
+    RUN_DEMUX(primer_annot_out, tn5_annot_out, fastq_out.collect())
 }
