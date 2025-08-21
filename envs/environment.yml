@@ -3,9 +3,11 @@ channels:
   - conda-forge
 dependencies:
   - python
+  - pip
+  - git
   - dos2unix
   - pigz
-  - pip
+  - pip:
       - argparse==1.4.0
       - biopython==1.85
       - et-xmlfile==2.0.0
@@ -13,5 +15,5 @@ dependencies:
       - openpyxl==3.1.5
       - pandas==2.2.3
       - pytz==2025.2
-      - scictextract==0.2
       - tzdata==2025.2
+      - git+https://github.com/mfitzgib/sciCTextract.git#egg=scictextract #- scictextract==0.2
