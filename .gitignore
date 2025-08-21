@@ -2,3 +2,5 @@ index_files/*.csv
 index_files/*.xlsx
 raw_data/*.gz
 raw_data_mod/*.gz
+.nextflox/*
+.nextflow.log*
