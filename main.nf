@@ -21,7 +21,7 @@ process PROCESS_PRIMER_ANNOT {
 
     script:
     """
-    python AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.baseName}_2.csv"
+    AddPrimerAnnotationCols.py -i $primer_annot -o "${primer_annot.baseName}_2.csv"
     dos2unix "${primer_annot.baseName}_2.csv"
     """
 }
@@ -36,7 +36,7 @@ process PROCESS_TN5_ANNOT {
 
     script:
     """
-    python Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.baseName}_2.csv"
+    Check_Tn5_file.py -i $tn5_annot -o "${tn5_annot.baseName}_2.csv"
     dos2unix "${tn5_annot.baseName}_2.csv"
     """
 }
@@ -51,7 +51,7 @@ process PROCESS_FASTQ {
 
     script:
     """
-    bash ModifyHeader.sh $fastq "${fastq.baseName}_mod.fastq.gz}"
+    bash ModifyHeader.sh $fastq "${fastq.baseName}_mod.fastq.gz"
     """
 }
 
