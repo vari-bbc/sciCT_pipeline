@@ -44,10 +44,10 @@ process PROCESS_TN5_ANNOT {
 process PROCESS_FASTQ {
     tag "$fastq.baseName"
     input:
-    path fastq
+    tuple val(idx), path(fastq)
 
     output:
-    path "${fastq.baseName}_mod.fastq.gz"
+    tuple val(idx), path("${fastq.baseName}_mod.fastq.gz")
 
     script:
     """
@@ -81,15 +81,18 @@ workflow {
     tn5_annot_ch = Channel.of(file(params.tn5_annot))
 
     fastqs = Channel.of(
-        file(params.fastq1),
-        file(params.fastq2),
-        file(params.umi1),
-        file(params.umi2)
+        tuple( 0, file(params.fastq1)),
+        tuple( 1, file(params.fastq2)),
+        tuple( 2, file(params.umi1)),
+        tuple( 3, file(params.umi2))
     )
 
     primer_annot_out  = PROCESS_PRIMER_ANNOT(primer_annot_ch)
     tn5_annot_out = PROCESS_TN5_ANNOT(tn5_annot_ch)
-    fastq_out     = PROCESS_FASTQ(fastqs)
+    ordered_fastqs = PROCESS_FASTQ(fastqs)
+        .toList()
+        .map { items -> items.sort{ a, b -> a[0] <=>b [0] } }
+        .map { items -> items.collect { it[ 1 ] } }
 
-    RUN_DEMUX(primer_annot_out, tn5_annot_out, fastq_out.collect())
+    RUN_DEMUX(primer_annot_out, tn5_annot_out, ordered_fastqs)
 }

@@ -1,7 +1,7 @@
 index_files/*.csv
 index_files/*.xlsx
 raw_data/*.gz
-raw_data_mod/*.gz
 .nextflow/*
 .nextflow.log*
 work/*
+results/*
