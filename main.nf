@@ -83,7 +83,7 @@ process PROCESS_PRIMER_ANNOT {
 
     script:
     """
-    python ${projectDir}/todo/sciCT_pipeline/bin/AddPrimerAnnotationCols.py \
+    python ${projectDir}/bin/AddPrimerAnnotationCols.py \
       -i ${primer_annot} \
       -o primer_annotation.csv
     sed -i 's/\r\$//' primer_annotation.csv
@@ -104,7 +104,7 @@ process PROCESS_TN5_ANNOT {
 
     script:
     """
-    python ${projectDir}/todo/sciCT_pipeline/bin/Check_Tn5_file.py \
+    python ${projectDir}/bin/Check_Tn5_file.py \
       -i ${tn5_annot} \
       -o tn5_annotation.csv
     sed -i 's/\r\$//' tn5_annotation.csv
