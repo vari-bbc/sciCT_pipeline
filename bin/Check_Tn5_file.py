@@ -22,7 +22,12 @@ elif file_extension == '.xlsx' or file_extension == '.xls':
 if df.iloc[-1].isnull().any():
     df = df.iloc[:-1]  # Remove last row if any value is missing
 
-# Save to CSV
-df.to_csv(args.output, index=False)
+required_cols = ['Sample Name', 'Tn5_s7', 'Tn5_s7_seq', 'Tn5_s5', 'Tn5_s5_seq']
+missing = [c for c in required_cols if c not in df.columns]
+if missing:
+    raise ValueError(f"Tn5 annotation file is missing required columns: {missing}")
 
+df = df[required_cols].drop_duplicates().copy()
+
+df.to_csv(args.output, index=False)
 
